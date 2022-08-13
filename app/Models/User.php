@@ -41,4 +41,32 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Write code on Method
+     *
+     * @return response()
+     */
+    public function generateCode()
+    {
+        $code = rand(1000, 9999);
+
+        UserCode::updateOrCreate(
+            [ 'user_id' => auth()->user()->id ],
+            [ 'code' => $code ]
+        );
+
+        try {
+
+            $details = [
+                'title' => 'Mail from ItSolutionStuff.com',
+                'code' => $code
+            ];
+
+            Mail::to(auth()->user()->email)->send(new SendCodeMail($details));
+
+        } catch (Exception $e) {
+            info("Error: ". $e->getMessage());
+        }
+    }
 }
